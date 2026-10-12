@@ -26,7 +26,7 @@ try {
 const PORT = Number(process.env.PORT) || 3000;
 const KEY = process.env.GEMINI_API_KEY || '';
 const API = process.env.GEMINI_API_BASE || 'https://generativelanguage.googleapis.com/v1beta';
-const IMG_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-1.5-flash';
+const IMG_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.0-flash-001';
 const TXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-2.0-flash-exp';
 const ACCESS = process.env.ACCESS_CODE || '';              // se definido, só quem souber cria sala
 const MAX_ROOMS = Number(process.env.MAX_ROOMS) || 5;       // salas ao mesmo tempo
