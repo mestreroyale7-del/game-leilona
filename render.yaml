@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: leilao-maluco
+    runtime: docker
+    plan: free            # no plano grátis o serviço "dorme" sem uso e as salas se perdem; use "starter" para jogar sem susto
+    healthCheckPath: /healthz
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false       # você cola o valor no painel da Render
+      - key: ACCESS_CODE
+        sync: false       # recomendado: só quem souber este código cria sala
+      - key: MAX_GAMES_PER_DAY
+        value: "20"
+      - key: MAX_ROOMS
+        value: "5"

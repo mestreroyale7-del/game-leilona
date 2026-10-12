@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2B35E6">
+<meta name="description" content="Leilão Maluco: dê lances em itens surpresa e monte seu ambiente com imagens feitas por IA.">
+<title>Leilão Maluco</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🔨%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16143F;--blue:#2B35E6;--yellow:#FFD21F;--pink:#FF5C93;--mint:#087558;--red:#C92F1B;--lilac:#CFCDFF;
+  --paper:#FFFFFF;--soft:#EEF0FF;--mut:#555A8C;
+  --font-d:'Lilita One','Arial Rounded MT Bold','Trebuchet MS',system-ui,sans-serif;
+  --font-b:'Nunito','Segoe UI',system-ui,-apple-system,sans-serif;
+  --hard:4px 4px 0 var(--ink);--hard-lg:6px 6px 0 var(--ink);
+  color-scheme:light;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--blue)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--paper);font-family:var(--font-b);font-size:17px;line-height:1.5;
+  background-color:var(--blue);
+  background-image:radial-gradient(rgba(255,255,255,.13) 1.6px,transparent 1.8px);background-size:24px 24px}
+button,input{font:inherit;color:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+
+/* toldo de feira */
+.awning{position:relative;height:22px;background:repeating-linear-gradient(90deg,var(--yellow) 0 36px,var(--pink) 36px 72px)}
+.awning::after{content:'';position:absolute;left:0;right:0;top:100%;height:18px;
+  background:repeating-linear-gradient(90deg,var(--yellow) 0 36px,var(--pink) 36px 72px);
+  -webkit-mask:radial-gradient(circle at 18px 0,#000 17px,transparent 18px) 0 0/36px 18px repeat-x;
+  mask:radial-gradient(circle at 18px 0,#000 17px,transparent 18px) 0 0/36px 18px repeat-x}
+
+.wrap{max-width:1080px;margin:0 auto;padding:34px 18px 56px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;min-height:44px}
+body[data-screen="home"] .top{display:none}
+.logo{font-family:var(--font-d);font-size:28px;color:var(--yellow);text-shadow:3px 3px 0 var(--ink);letter-spacing:.01em;transform:rotate(-2deg)}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:var(--paper);color:var(--ink);border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-weight:800;font-size:15px}
+.chip b{font-family:var(--font-d);font-weight:400;letter-spacing:.16em;font-size:20px}
+h1,h2,h3,h4{font-family:var(--font-d);font-weight:400;margin:0;line-height:1.05;letter-spacing:.01em}
+
+.card{background:var(--paper);color:var(--ink);border:3px solid var(--ink);border-radius:22px;padding:20px;box-shadow:var(--hard-lg)}
+.btn{appearance:none;cursor:pointer;min-height:50px;padding:10px 22px;border-radius:14px;border:3px solid var(--ink);background:var(--yellow);color:var(--ink);
+  font-weight:800;font-size:17px;box-shadow:0 4px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 5px 0 var(--ink)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn.ghost{background:var(--paper)}
+.btn[disabled]{opacity:.5;cursor:not-allowed;transform:none;box-shadow:0 4px 0 var(--ink)}
+input[type=text],input[type=number],input[type=password]{width:100%;min-height:52px;padding:10px 14px;border-radius:14px;border:3px solid var(--ink);background:var(--soft);color:var(--ink);font-weight:700;font-size:18px}
+input::placeholder{color:#7C80AA;font-weight:600}
+label{display:block;margin-bottom:8px;font-weight:800;font-size:17px;color:var(--ink)}
+.mut{color:var(--mut)}
+.msg{min-height:24px;margin-top:12px;font-weight:700;color:var(--ink)}
+.msg.err{color:var(--red)}
+.bidrow{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
+.bidrow input{flex:1 1 130px}
+.conn{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:999px;border:3px solid var(--paper);font-weight:800;font-size:15px;z-index:5}
+
+/* início */
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:28px;align-items:center;padding:6px 0 10px}
+.hero h1{font-size:clamp(60px,13vw,124px);line-height:.88;color:var(--paper);text-shadow:5px 5px 0 var(--ink);transform:rotate(-2deg);transform-origin:left bottom}
+.hero p{max-width:40ch;margin:26px 0 0;font-size:19px;font-weight:600;color:rgba(255,255,255,.94)}
+.hero-tags{display:grid;gap:16px;justify-items:start;padding:8px 0}
+.tagcard{--r:0deg;--x:0px;display:flex;align-items:center;gap:12px;padding:10px 18px 10px 14px;background:var(--paper);color:var(--ink);border:3px solid var(--ink);border-radius:14px 26px 26px 14px;box-shadow:var(--hard);
+  transform:translate(var(--x),0) rotate(var(--r));animation:drop .7s cubic-bezier(.3,1.5,.5,1) both}
+.tagcard .te{font-size:34px;line-height:1}
+.tagcard b{font-weight:800;font-size:16px;line-height:1.15}
+.tagcard .tp{margin-left:auto;padding-left:10px;font-family:var(--font-d);font-size:22px;white-space:nowrap}
+.t1{--r:-4deg;--x:0px;animation-delay:.1s}
+.t2{--r:3deg;--x:36px;animation-delay:.3s}
+.t3{--r:-2deg;--x:12px;animation-delay:.5s}
+@keyframes drop{from{opacity:0;transform:translate(var(--x),-70px) rotate(calc(var(--r) - 14deg))}to{opacity:1;transform:translate(var(--x),0) rotate(var(--r))}}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:30px}
+.codein{text-transform:uppercase;letter-spacing:.4em;font-family:var(--font-d)!important;font-weight:400!important;font-size:28px!important;text-align:center;padding-left:.4em!important}
+.steps{list-style:none;margin:40px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.steps li{display:flex;gap:14px;align-items:flex-start;color:rgba(255,255,255,.94);font-weight:600}
+.steps strong{display:block;font-family:var(--font-d);font-weight:400;font-size:22px;color:var(--paper);margin-bottom:2px}
+.steps .n{flex:none;width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:var(--yellow);color:var(--ink);border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-family:var(--font-d);font-size:22px}
+
+/* plaquinhas dos jogadores */
+.plist{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:10px}
+.prow{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:16px;background:var(--paper);color:var(--ink);border:3px solid var(--ink)}
+.prow.click{cursor:pointer;transition:transform .08s}
+.prow.click:hover{transform:translateY(-1px)}
+.prow.sel{background:var(--yellow)}
+.pad{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-d);font-size:21px;line-height:1;color:var(--ink);
+  background:hsl(var(--h) 92% 64%);border:3px solid var(--ink)}
+.prow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:800}
+.tag{font-size:13px;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--pink);color:var(--ink);border:2px solid var(--ink)}
+.theme{display:inline-block;margin-top:8px;font-size:14px;font-weight:800;padding:3px 12px;border-radius:999px;background:var(--lilac);color:var(--ink);border:2px solid var(--ink)}
+.money{font-family:var(--font-d);font-size:20px;letter-spacing:.01em}
+
+/* sala */
+.lobby{max-width:660px;margin:0 auto;text-align:center}
+.bigcode{display:flex;gap:12px;justify-content:center;margin:14px 0 4px}
+.tile{width:clamp(58px,17vw,100px);aspect-ratio:3/4;display:grid;place-items:center;background:var(--yellow);color:var(--ink);border:3px solid var(--ink);border-radius:18px;box-shadow:var(--hard);font-family:var(--font-d);font-size:clamp(42px,13vw,76px);line-height:1}
+.tile:nth-child(even){background:var(--pink);transform:rotate(2deg)}
+.tile:nth-child(odd){transform:rotate(-2deg)}
+.lobby .sub{margin-top:26px;text-align:left;font-size:22px}
+.lobby .plist{text-align:left}
+.lobby .bidrow{justify-content:center}
+.lobby .msg{text-align:left}
+
+/* preparando */
+.prep{max-width:560px;margin:30px auto 0;text-align:center;padding:44px 22px}
+.prep .em{font-size:84px;line-height:1;display:inline-block;animation:bob 1.1s ease-in-out infinite}
+.prep h2{margin-top:14px;font-size:34px}
+.prep p{margin:10px auto 0;max-width:36ch;font-weight:600}
+.prep-bar{height:16px;max-width:360px;margin:26px auto 0;border:3px solid var(--ink);border-radius:999px;overflow:hidden;background:var(--soft)}
+.prep-bar i{display:block;height:100%;width:38%;background:var(--pink);border-right:3px solid var(--ink);animation:slide 1.5s ease-in-out infinite}
+.dots::after{content:'';animation:dots 1.2s steps(4) infinite}
+@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-14px) rotate(4deg)}}
+@keyframes slide{0%{transform:translateX(-110%)}100%{transform:translateX(280%)}}
+
+/* leilão */
+.game{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;align-items:start}
+.col{display:flex;flex-direction:column;gap:22px;min-width:0}
+.scene{padding:0;overflow:hidden}
+.scene .frame{aspect-ratio:3/2;background:var(--soft);display:grid;place-items:center;position:relative;border-bottom:3px solid var(--ink)}
+.scene img{width:100%;height:100%;display:block;object-fit:cover}
+.scene .busy{position:absolute;left:12px;bottom:12px;display:flex;align-items:center;gap:8px;background:var(--ink);color:var(--paper);padding:7px 14px;border-radius:999px;font-size:14px;font-weight:800}
+.scene .busy::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--yellow);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+.scene .cap{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:14px 18px 16px;flex-wrap:wrap}
+.scene .cap h3{font-size:26px}
+.scene .st{font-size:14px;font-weight:800;color:var(--red)}
+
+.item{position:relative;overflow:hidden;padding-top:36px}
+.item::before{content:'';position:absolute;left:0;right:0;top:0;height:14px;background:var(--soft);border-bottom:3px solid var(--ink)}
+.item .bar{position:absolute;left:0;top:0;height:11px;width:100%;transform-origin:left;background:var(--mint);border-right:3px solid var(--ink);z-index:1}
+.item .bar.low{background:var(--red)}
+.item .count{font-weight:800;font-size:15px}
+.item .emo{width:92px;height:92px;display:grid;place-items:center;font-size:54px;line-height:1;margin-top:10px;background:var(--lilac);border:3px solid var(--ink);border-radius:50%;box-shadow:3px 3px 0 var(--ink);transform:rotate(-6deg)}
+.item h2{font-size:clamp(30px,5vw,40px);margin-top:14px}
+.price{position:relative;display:inline-block;margin:20px 0 8px 4px;padding:4px 24px 4px 44px;background:var(--yellow);border:3px solid var(--ink);border-radius:12px 28px 28px 12px;box-shadow:var(--hard);transform:rotate(-2deg);
+  font-family:var(--font-d);font-size:clamp(44px,9vw,66px);line-height:1.1;letter-spacing:.01em}
+.price::before{content:'';position:absolute;left:13px;top:50%;width:15px;height:15px;margin-top:-8px;border-radius:50%;background:var(--paper);border:3px solid var(--ink)}
+.lead{font-weight:800;font-size:18px}
+.secs{font-family:var(--font-d);font-size:24px;letter-spacing:.01em}
+.item .bidrow .btn:first-of-type,.home-grid .bidrow .btn:first-of-type{flex:1 1 180px}
+#bidGo{min-height:56px;font-size:19px}
+.quick{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.quick .btn{min-height:42px;padding:6px 16px;border-radius:999px;font-size:16px;box-shadow:0 3px 0 var(--ink)}
+.banner{padding:18px;border-radius:18px;background:var(--yellow);color:var(--ink);border:3px solid var(--ink);box-shadow:var(--hard);font-weight:800;font-size:19px}
+.banner .g{font-size:46px;line-height:1;display:inline-block;transform-origin:70% 80%;animation:hit .5s ease-out 1}
+@keyframes hit{0%{transform:rotate(-40deg)}60%{transform:rotate(12deg)}100%{transform:rotate(0)}}
+.board h3{font-size:24px}
+.b-players{background:var(--lilac)}
+.b-players .hint{margin:6px 0 0;font-size:14px;font-weight:700;color:var(--ink)}
+.mine{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.mine span{padding:6px 12px;border-radius:999px;background:var(--soft);border:2px solid var(--ink);font-size:15px;font-weight:800;color:var(--ink)}
+.mine span.mut{background:transparent;border-style:dashed;color:var(--mut);font-weight:700}
+
+/* fim */
+.endcard{background:var(--yellow)}
+.endcard h1{font-size:clamp(40px,8vw,68px)}
+.endcard .msg{margin-top:10px}
+.endcard .msg.err{color:#9E2112}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:24px;margin-top:26px}
+.pcard{padding:0;overflow:hidden}
+.pcard .phead{display:flex;align-items:center;gap:12px;padding:14px 16px;background:hsl(var(--h) 90% 72%);border-bottom:3px solid var(--ink)}
+.pcard .phead .nm{flex:1;min-width:0;font-family:var(--font-d);font-size:24px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard img{width:100%;aspect-ratio:3/2;object-fit:cover;display:block;background:var(--soft);border-bottom:3px solid var(--ink)}
+.pcard .pbody{padding:16px 18px 20px}
+.pcard h4{margin:18px 0 6px;font-size:20px}
+.pcard ul{margin:0;padding:0;list-style:none}
+.pcard li{position:relative;margin:6px 0;padding-left:26px;font-size:16px;font-weight:600}
+.pcard li::before{position:absolute;left:0;top:0;font-weight:800}
+.pcard .pro h4{color:var(--mint)}
+.pcard .pro li::before{content:'✓';color:var(--mint)}
+.pcard .con h4{color:var(--red)}
+.pcard .con li::before{content:'✕';color:var(--red)}
+.debate{margin-top:18px;padding:12px 14px;border-radius:16px;background:var(--lilac);border:3px solid var(--ink);font-weight:800;font-size:16px}
+.again{margin-top:28px;display:flex;justify-content:center}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr}
+  .hero-tags{display:none}
+  .home-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr;gap:16px}
+  .game{grid-template-columns:1fr;gap:18px}
+  .col{display:contents}
+  .item{order:1}.scene{order:2}.b-mine{order:3}.b-players{order:4}
+}
+@media (max-width:520px){
+  .wrap{padding:30px 14px 48px}
+  .awning{height:18px}
+  .card{padding:16px;box-shadow:5px 5px 0 var(--ink)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body data-screen="home">
+<div class="awning" aria-hidden="true"></div>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">Leilão Maluco</div>
+    <div class="chip" id="codeChip" hidden>Sala <b id="codeChipTxt"></b></div>
+  </div>
+
+  <!-- INÍCIO -->
+  <section id="home">
+    <div class="hero">
+      <div>
+        <h1>Leilão<br>Maluco</h1>
+        <p>Cada amigo ganha R$ 1.000 para montar o mesmo lugar vazio. Dê lances em 10 itens surpresa e veja o seu cenário ganhar vida com imagens feitas por IA.</p>
+      </div>
+      <div class="hero-tags" aria-hidden="true">
+        <div class="tagcard t1"><span class="te">💧</span><b>Filtro de água portátil</b><span class="tp">R$ 60</span></div>
+        <div class="tagcard t2"><span class="te">🛋️</span><b>Sofá banhado a ouro</b><span class="tp">R$ 90</span></div>
+        <div class="tagcard t3"><span class="te">🪣</span><b>Balde com furo</b><span class="tp">R$ 10</span></div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="card">
+        <label for="nick">Seu apelido</label>
+        <input type="text" id="nick" maxlength="14" placeholder="Como os amigos te chamam?" autocomplete="off">
+        <div id="accessBox" hidden style="margin-top:14px">
+          <label for="access">Código de acesso (só para criar sala)</label>
+          <input type="password" id="access" autocomplete="off">
+        </div>
+        <div class="msg" id="homeMsg" role="status"></div>
+      </div>
+      <div class="card">
+        <label for="codeIn">Código da sala</label>
+        <input type="text" id="codeIn" class="codein" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters">
+        <div class="bidrow">
+          <button class="btn" id="joinBtn" type="button">Entrar na sala</button>
+          <button class="btn ghost" id="createBtn" type="button">Criar sala nova</button>
+        </div>
+      </div>
+    </div>
+
+    <ol class="steps">
+      <li><span class="n">1</span><div><strong>Veja o item</strong>Cada rodada mostra um objeto surpresa. O tema é sobrevivência, luxo ou os dois, conforme o lugar sorteado.</div></li>
+      <li><span class="n">2</span><div><strong>Dê seu lance</strong>Cobriu o último lance? O tempo estica. Ninguém cobriu? O item é seu e a foto do seu lugar é refeita com ele.</div></li>
+      <li><span class="n">3</span><div><strong>Compare as cenas</strong>No fim, a IA aponta prós e contras de cada ambiente, para vocês discutirem quem montou melhor.</div></li>
+    </ol>
+  </section>
+
+  <!-- SALA -->
+  <section id="lobby" hidden>
+    <div class="card lobby">
+      <div class="mut" style="font-weight:800">Código da sala</div>
+      <div class="bigcode" id="lobbyCode" role="img"></div>
+      <div class="bidrow"><button class="btn ghost" id="copyBtn" type="button">Copiar link</button></div>
+      <h3 class="sub">Na sala</h3>
+      <ul class="plist" id="lobbyList"></ul>
+      <div class="msg" id="lobbyMsg" role="status"></div>
+      <div class="bidrow">
+        <button class="btn" id="startBtn" type="button" hidden>Começar o leilão</button>
+        <button class="btn ghost" id="leaveBtn" type="button">Sair da sala</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREPARANDO -->
+  <section id="prep" hidden>
+    <div class="card prep">
+      <div class="em" id="prepEmo">🎲</div>
+      <h2>Preparando o leilão<span class="dots"></span></h2>
+      <p id="prepTxt">Sorteando o ambiente e fotografando o lugar vazio.</p>
+      <div class="prep-bar" aria-hidden="true"><i></i></div>
+    </div>
+  </section>
+
+  <!-- LEILÃO -->
+  <section id="game" hidden>
+    <div class="game">
+      <div class="col">
+        <div class="card scene">
+          <div class="frame" id="sceneFrame"><img id="sceneImg" alt="" hidden><div class="busy" id="sceneBusy" hidden>Gerando a imagem…</div></div>
+          <div class="cap">
+            <div><h3 id="sceneTitle"></h3><span class="theme" id="envTheme"></span></div>
+            <span class="st" id="sceneSt"></span>
+          </div>
+        </div>
+        <div class="card board b-mine">
+          <h3>Seus itens</h3>
+          <div class="mine" id="mine"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card item" id="itemCard">
+          <div class="bar" id="bar"></div>
+          <div class="mut count" id="itemCount"></div>
+          <div id="itemBody"></div>
+        </div>
+        <div class="card board b-players">
+          <h3>Jogadores</h3>
+          <p class="hint">Toque num jogador para ver o ambiente dele.</p>
+          <ul class="plist" id="gameList"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FIM -->
+  <section id="end" hidden>
+    <div class="card endcard">
+      <h1>Fim do leilão 🔨</h1>
+      <p style="margin:8px 0 0;font-weight:800" id="endSub"></p>
+      <div class="msg" id="evalMsg" role="status"></div>
+      <div class="bidrow" id="evalBox"></div>
+    </div>
+    <div class="pgrid" id="pgrid"></div>
+    <div class="again"><button class="btn" id="againBtn" type="button">Voltar ao início</button></div>
+  </section>
+</div>
+<div class="conn" id="conn" hidden>Reconectando…</div>
+
+<script>
+(()=>{
+'use strict';
+const OPEN_MS=25000,INC=10;
+const $=(s,r=document)=>r.querySelector(s);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const brl=n=>'R$ '+Number(n||0).toLocaleString('pt-BR');
+const HUES=[262,8,160,32,200,330,95,285];
+let pid='',nick='',code='',S=null,recvAt=0,es=null,viewIdx=-2,cfg={needsAccess:false,ready:true};
+
+function newPid(){const a=new Uint8Array(16);crypto.getRandomValues(a);return [...a].map(x=>x.toString(16).padStart(2,'0')).join('')}
+try{pid=localStorage.getItem('lm_pid')||'';nick=localStorage.getItem('lm_nick')||''}catch(e){}
+if(!/^[a-f0-9]{32}$/.test(pid)){pid=newPid();try{localStorage.setItem('lm_pid',pid)}catch(e){}}
+$('#nick').value=nick;
+
+function show(id){for(const s of ['home','lobby','prep','game','end'])$('#'+s).hidden=(s!==id);document.body.dataset.screen=id}
+function homeMsg(t,err){const m=$('#homeMsg');m.textContent=t||'';m.className='msg'+(err?' err':'')}
+function lobbyMsg(t,err){const m=$('#lobbyMsg');m.textContent=t||'';m.className='msg'+(err?' err':'')}
+async function api(path,body){
+  let r;
+  try{r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})}
+  catch(e){throw new Error('Sem conexão com o servidor.')}
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.error||'Algo deu errado.');
+  return j;
+}
+function getNick(){
+  const v=$('#nick').value.trim().slice(0,14);
+  if(!v){homeMsg('Escolha um apelido primeiro.',true);$('#nick').focus();return null}
+  nick=v;try{localStorage.setItem('lm_nick',v)}catch(e){}
+  return v;
+}
+
+/* ---------- conexão ---------- */
+function connect(){
+  if(es)es.close();
+  es=new EventSource('/api/events?code='+encodeURIComponent(code)+'&pid='+pid);
+  es.addEventListener('s',e=>{try{S=JSON.parse(e.data)}catch(x){return}recvAt=Date.now();$('#conn').hidden=true;render()});
+  es.onerror=()=>{
+    if(es.readyState===EventSource.CLOSED){leave('A sala foi encerrada ou não existe mais.')}
+    else $('#conn').hidden=false;
+  };
+}
+function leave(msg){
+  if(es){es.close();es=null}
+  S=null;code='';viewIdx=-2;$('#conn').hidden=true;$('#codeChip').hidden=true;
+  show('home');homeMsg(msg||'');
+}
+async function enter(c,creating){
+  code=c;
+  $('#codeChip').hidden=false;$('#codeChipTxt').textContent=code;
+  connect();
+  show('lobby');setCode(code);
+}
+async function createClick(){
+  if(!getNick())return;
+  homeMsg('Criando a sala…');
+  try{
+    const r=await api('/api/create',{pid,name:nick,access:$('#access').value});
+    homeMsg('');enter(r.code,true);
+  }catch(e){homeMsg(e.message,true);if(cfg.needsAccess)$('#access').focus()}
+}
+async function joinClick(){
+  if(!getNick())return;
+  const c=$('#codeIn').value.trim().toUpperCase();
+  if(c.length!==4){homeMsg('O código tem 4 letras.',true);return}
+  homeMsg('Entrando…');
+  try{await api('/api/join',{code:c,pid,name:nick});homeMsg('');enter(c,false)}
+  catch(e){homeMsg(e.message,true)}
+}
+
+/* ---------- render ---------- */
+function setCode(c){
+  const box=$('#lobbyCode');if(box.dataset.c===c)return;box.dataset.c=c;box.replaceChildren();
+  for(const ch of c)box.append(el('span','tile',ch));
+  box.setAttribute('aria-label','Código da sala: '+c.split('').join(' '));
+}
+function padEl(i){const p=el('div','pad',String(i+1));p.style.setProperty('--h',HUES[i%HUES.length]);return p}
+function sceneUrl(idx){
+  if(!S)return '';
+  const p=S.pl[idx];
+  if(idx>=0&&p&&p.sv>0)return '/img/'+S.code+'/'+idx+'/'+p.sv;
+  return S.bv?('/img/'+S.code+'/base/1'):'';
+}
+function itemOf(i){const r=S.rv[i];return r?{n:r[0],e:r[1],d:r[2]||''}:{n:'?',e:'🎁',d:''}}
+function render(){
+  if(!S)return;
+  if(S.ph==='lobby'){show('lobby');renderLobby()}
+  else if(S.ph==='prep'){show('prep');$('#prepEmo').textContent=(S.env&&S.env.e)||'🎲';$('#prepTxt').textContent=S.env?('Ambiente sorteado: '+S.env.n+' (tema: '+S.env.t+'). Escolhendo os itens e fotografando o lugar vazio.'):'Sorteando o ambiente.'}
+  else if(S.ph==='bid'||S.ph==='gap'){show('game');renderGame()}
+  else if(S.ph==='end'){show('end');renderEnd()}
+}
+function renderLobby(){
+  setCode(S.code);
+  const ul=$('#lobbyList');ul.replaceChildren();
+  S.pl.forEach((p,i)=>{const li=el('li','prow');li.append(padEl(i),el('span','nm',p.n+(i===S.me?' (você)':'')));if(!p.on)li.append(el('span','mut','offline'));ul.append(li)});
+  $('#startBtn').hidden=!S.host;
+  if(S.err)lobbyMsg(S.err,true);
+  else lobbyMsg(S.host?'Quando todo mundo estiver na lista, comece o leilão.':'Esperando quem criou a sala começar o leilão.');
+}
+function renderGame(){
+  if(viewIdx===-2)viewIdx=S.me>=0?S.me:0;
+  if(viewIdx>=S.pl.length)viewIdx=Math.max(0,S.me);
+  const vp=S.pl[viewIdx];
+  $('#sceneTitle').textContent=(S.env.e+' '+S.env.n).trim()+(vp&&viewIdx!==S.me?' · de '+vp.n:'');
+  $('#envTheme').textContent=S.env.t?('Tema: '+S.env.t):'';
+  const url=sceneUrl(viewIdx);const im=$('#sceneImg');
+  if(url&&im.dataset.u!==url){im.dataset.u=url;im.src=url;im.alt='Ambiente de '+(vp?vp.n:'')}
+  im.hidden=!url;
+  $('#sceneBusy').hidden=!(vp&&vp.sb);
+  const me=S.me;
+  const body=$('#itemBody');
+  const k=S.ph+'|'+S.i+'|'+(S.lr?S.lr.join(','):'');
+  if(S.ph==='bid'&&S.cur){
+    $('#itemCount').textContent='Item '+(S.i+1)+' de '+S.n;
+    if(body.dataset.k!==S.ph+'|'+S.i){
+      body.dataset.k=S.ph+'|'+S.i;body.replaceChildren();
+      const emo=el('div','emo',S.cur.e);const h=el('h2',null,S.cur.n);const d=el('p','mut',S.cur.d);d.style.margin='6px 0 0';
+      const price=el('div','price');price.id='price';
+      const lead=el('div','lead');lead.id='lead';
+      const secs=el('div','secs');secs.id='secs';secs.style.marginTop='6px';
+      const row=el('div','bidrow');
+      const inp=document.createElement('input');inp.type='number';inp.id='bidIn';inp.inputMode='numeric';inp.step='10';inp.setAttribute('aria-label','Valor do lance em reais');
+      const go=el('button','btn','Dar lance');go.id='bidGo';
+      const pass=el('button','btn ghost','Passar');pass.id='passBtn';
+      row.append(inp,go,pass);
+      const q=el('div','quick');
+      for(const n of [10,50,100]){const b=el('button','btn ghost','+'+n);b.dataset.add=n;q.append(b)}
+      const err=el('div','msg');err.id='bidErr';
+      body.append(emo,h,d,price,lead,secs,row,q,err);
+      go.onclick=async()=>{
+        const a=Math.round(Number(inp.value));
+        try{err.textContent='';err.className='msg';await api('/api/bid',{code,pid,amount:a})}
+        catch(e){err.textContent=e.message;err.className='msg err'}
+      };
+      pass.onclick=async()=>{try{await api('/api/pass',{code,pid});pass.disabled=true;pass.textContent='Você passou'}catch(e){}};
+      q.onclick=e=>{const a=Number(e.target.dataset&&e.target.dataset.add);if(!a)return;const base=Math.max(Number(inp.value)||0,minNext());inp.value=base+a;updateBidUI()};
+      inp.oninput=updateBidUI;
+      inp.value=minNext();
+    }
+    updateBidUI();
+    $('#bar').hidden=false;
+  }else{
+    $('#bar').hidden=true;
+    if(body.dataset.k!==k){
+      body.dataset.k=k;body.replaceChildren();
+      $('#itemCount').textContent=S.i+1<S.n?'Próximo item já já':'Último item vendido';
+      const b=el('div','banner');
+      if(S.lr){
+        const it=itemOf(S.lr[0]);const w=S.pl[S.lr[1]];
+        b.append(el('span','g','🔨'),document.createElement('br'));
+        if(w)b.append(document.createTextNode(it.e+' '+it.n+' vendido para '+w.n+(S.lr[1]===me?' (você!)':'')+' por '+brl(S.lr[2])+'.'));
+        else b.append(document.createTextNode(it.e+' '+it.n+' encalhou. Ninguém quis.'));
+      }
+      body.append(b);
+      const t=el('div','secs');t.id='secs';t.style.marginTop='12px';body.append(t);
+    }
+  }
+  const ul=$('#gameList');ul.replaceChildren();
+  S.pl.forEach((p,i)=>{
+    const li=el('li','prow click'+(i===viewIdx?' sel':''));
+    li.tabIndex=0;li.setAttribute('role','button');li.setAttribute('aria-label','Ver o ambiente de '+p.n);
+    li.append(padEl(i),el('span','nm',p.n+(i===me?' (você)':'')));
+    if(S.ph==='bid'&&S.hi&&S.hi[0]===i)li.append(el('span','tag','na frente'));
+    li.append(el('span','money',brl(p.b)));
+    const pick=()=>{viewIdx=i;renderGame()};
+    li.onclick=pick;li.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}};
+    ul.append(li);
+  });
+  const mine=$('#mine');mine.replaceChildren();
+  const wins=S.rs.filter(r=>r[1]===me);
+  if(me<0)mine.append(el('span','mut','Você chegou depois do começo e está assistindo.'));
+  else if(!wins.length)mine.append(el('span','mut','Nada ainda. Seu ambiente continua vazio.'));
+  wins.forEach(r=>{const it=itemOf(r[0]);mine.append(el('span',null,it.e+' '+it.n+' · '+brl(r[2])))});
+  const mp=S.pl[me];
+  $('#sceneSt').textContent=mp&&mp.sf?(mp.sf+' item(ns) não saiu(íram) na imagem'):'';
+}
+function myBalance(){return S.me>=0?S.pl[S.me].b:0}
+function minNext(){if(!S||!S.cur)return 10;return S.hi?S.hi[1]+INC:S.cur.m}
+function updateBidUI(){
+  if(!S||S.ph!=='bid'||!S.cur)return;
+  const me=S.me;const inp=$('#bidIn'),go=$('#bidGo'),pass=$('#passBtn'),price=$('#price'),lead=$('#lead');
+  if(!inp)return;
+  if(S.hi){const w=S.pl[S.hi[0]];price.textContent=brl(S.hi[1]);lead.textContent=(w?w.n:'Alguém')+(S.hi[0]===me?' (você) está na frente':' está na frente')}
+  else{price.textContent=brl(S.cur.m);lead.textContent='Sem lances ainda. Lance mínimo '+brl(S.cur.m)}
+  const mn=minNext();const a=Math.round(Number(inp.value));
+  const leader=S.hi&&S.hi[0]===me;
+  go.disabled=!(me>=0&&!leader&&Number.isFinite(a)&&a>=mn&&a<=myBalance());
+  go.textContent=leader?'Você está na frente':(a>myBalance()?'Saldo insuficiente':'Dar lance de '+brl(a||mn));
+  if(me<0){pass.disabled=true;go.disabled=true}
+  if(Number(inp.value)<mn&&document.activeElement!==inp)inp.value=mn;
+}
+function tick(){
+  if(!S)return;
+  const rem=Math.max(0,S.rem-(Date.now()-recvAt));
+  const s=Math.ceil(rem/1000);
+  const secs=$('#secs');
+  if(secs&&!$('#game').hidden)secs.textContent=S.ph==='bid'?('Termina em '+s+'s'):(S.ph==='gap'&&S.i+1<S.n?('Próximo item em '+s+'s'):'');
+  const bar=$('#bar');
+  if(bar&&S.ph==='bid'){bar.style.transform='scaleX('+Math.min(1,rem/OPEN_MS)+')';bar.classList.toggle('low',rem<5000)}
+}
+setInterval(tick,150);
+
+/* ---------- fim de jogo ---------- */
+let endKey='';
+function listBlock(cls,title,arr){
+  const d=el('div',cls);d.append(el('h4',null,title));
+  const ul=document.createElement('ul');arr.forEach(x=>ul.append(el('li',null,x)));d.append(ul);return d;
+}
+function renderEnd(){
+  const key=JSON.stringify([S.pl,S.rs,S.ev,S.evb,S.eve]);
+  if(key===endKey)return;endKey=key;
+  $('#endSub').textContent=(S.env.e+' '+S.env.n).trim()+(S.env.t?' · tema: '+S.env.t:'');
+  const em=$('#evalMsg'),box=$('#evalBox');box.replaceChildren();
+  const waiting=S.pl.some(p=>p.sb);
+  const haveAll=S.ev&&S.ev.every(x=>x);
+  if(waiting)em.textContent='Ainda gerando as últimas imagens…';
+  else if(S.evb)em.textContent='A IA está avaliando os ambientes…';
+  else if(haveAll)em.textContent='';
+  else if(S.eve){em.textContent=S.eve}
+  else em.textContent='Preparando a avaliação…';
+  em.className='msg'+((S.eve&&!S.evb&&!waiting&&!haveAll)?' err':'');
+  if(S.host&&!waiting&&!S.evb&&!haveAll&&S.eve){const b=el('button','btn','Tentar avaliar de novo');b.onclick=()=>api('/api/eval',{code,pid}).catch(()=>{});box.append(b)}
+  const grid=$('#pgrid');grid.replaceChildren();
+  S.pl.forEach((p,i)=>{
+    const card=el('div','card pcard');card.style.setProperty('--h',HUES[i%HUES.length]);
+    const head=el('div','phead');
+    head.append(padEl(i),el('span','nm',p.n+(i===S.me?' (você)':'')),el('span','money',brl(p.b)));
+    card.append(head);
+    const u=sceneUrl(i);
+    if(u){const im=document.createElement('img');im.alt='Ambiente de '+p.n;im.src=u;card.append(im)}
+    const body=el('div','pbody');
+    const mine=el('div','mine');mine.style.marginTop='0';
+    const wins=S.rs.filter(r=>r[1]===i);
+    if(!wins.length)mine.append(el('span','mut','Não comprou nada.'));
+    wins.forEach(r=>{const it=itemOf(r[0]);mine.append(el('span',null,it.e+' '+it.n+' · '+brl(r[2])))});
+    body.append(mine);
+    const ev=S.ev&&S.ev[i];
+    if(ev){
+      if(ev.resumo){const r=el('p',null,ev.resumo);r.style.margin='12px 0 0';r.style.fontWeight='600';body.append(r)}
+      if(ev.pros&&ev.pros.length)body.append(listBlock('pro','Prós',ev.pros));
+      if(ev.contras&&ev.contras.length)body.append(listBlock('con','Contras',ev.contras));
+      if(ev.debate)body.append(el('div','debate','Para discutir: '+ev.debate));
+    }
+    card.append(body);grid.append(card);
+  });
+}
+
+/* ---------- ligações ---------- */
+$('#joinBtn').onclick=joinClick;
+$('#createBtn').onclick=createClick;
+$('#startBtn').onclick=async()=>{try{lobbyMsg('');await api('/api/start',{code,pid})}catch(e){lobbyMsg(e.message,true)}};
+$('#leaveBtn').onclick=()=>leave('');
+$('#copyBtn').onclick=async()=>{
+  const b=$('#copyBtn'),link=location.origin+'/?sala='+code;
+  try{await navigator.clipboard.writeText(link);b.textContent='Link copiado!'}
+  catch(e){b.textContent='Copie: '+link}
+  setTimeout(()=>{b.textContent='Copiar link'},2500);
+};
+$('#againBtn').onclick=()=>{endKey='';leave('')};
+$('#codeIn').addEventListener('keydown',e=>{if(e.key==='Enter')joinClick()});
+$('#codeIn').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z]/g,'')});
+(()=>{const q=(new URLSearchParams(location.search).get('sala')||'').toUpperCase();
+  if(/^[A-Z]{4}$/.test(q)){$('#codeIn').value=q;homeMsg('Escreva seu apelido e toque em Entrar na sala para jogar na sala '+q+'.')}})();
+fetch('/api/config').then(r=>r.json()).then(c=>{cfg=c;$('#accessBox').hidden=!c.needsAccess;if(!c.ready)homeMsg('O servidor está sem a chave da API do Gemini. Veja o README.',true)}).catch(()=>{});
+})();
+</script>
+</body>
+</html>
